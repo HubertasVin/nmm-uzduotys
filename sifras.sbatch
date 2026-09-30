@@ -6,7 +6,8 @@
 
 module load openmpi
 
-if ! .venv-hpc/bin/python3 -c "import mpi4py" 2>/dev/null; then
+# import mpi4py.MPI dlopens libmpi; bare "import mpi4py" does not
+if ! .venv-hpc/bin/python3 -c "import mpi4py.MPI" 2>/dev/null; then
     rm -rf .venv-hpc
     python3 -m venv .venv-hpc
     .venv-hpc/bin/pip install --no-binary mpi4py mpi4py
