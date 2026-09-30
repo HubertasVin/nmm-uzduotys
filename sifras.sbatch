@@ -4,7 +4,10 @@
 #SBATCH -t 00:30:00
 #SBATCH -o sifras_%j.out
 
-module load openmpi
+module load openmpi/3.0.0
+
+exec python3 -m venv .venv-hpc
+.venv-hpc/bin/pip install mpi4py 2&>1 /dev/null
 
 PYTHON_PROGRAM=${PYTHON_PROGRAM:-.venv-hpc/bin/python3}
 RUN_COMMAND=${RUN_COMMAND:-srun --mpi=openmpi}
