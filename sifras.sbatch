@@ -5,7 +5,7 @@
 #SBATCH -o sifras_%j.out
 
 module load openmpi
-module load Python3
+module load /usr/bin/python3
 
 # Debian system python is externally managed (PEP 668) -> use a venv
 VENV=.venv-hpc
