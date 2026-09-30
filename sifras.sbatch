@@ -5,11 +5,13 @@
 #SBATCH -o sifras_%j.out
 
 module load openmpi
-module load /usr/bin/python3
 
 # Debian system python is externally managed (PEP 668) -> use a venv
+PY=$(command -v python3)
 VENV=.venv-hpc
-python3 -m venv "$VENV" || { echo "ERROR: venv creation failed (python3-venv missing?)" >&2; exit 1; }
+if [ ! -x "$VENV/bin/python" ]; then
+    "$PY" -m venv "$VENV" || { echo "ERROR: venv creation failed (python3-venv missing?)" >&2; exit 1; }
+fi
 PY="$VENV/bin/python"
 
 # mpi4py needs mpicc from the loaded openmpi module if it has to compile
