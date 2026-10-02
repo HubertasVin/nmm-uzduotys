@@ -12,43 +12,39 @@ def baito_intervalas(s):
     return s / intervalu_sk, (s + 1) / intervalu_sk
 
 
-def orbitos_ribos(r):
-    hi = r / 4
-    return logistinis(hi, r), hi
-
-
 def sifruoti(data, r, x0):
-    olo, ohi = orbitos_ribos(r)
     rez = []
+    x = x0
     for s in data:
         n = 0
-        x = x0
         lo, hi = baito_intervalas(s)
-        while not (lo <= (x - olo) / (ohi - olo) < hi):
+        while not (lo <= x < hi):
             x = logistinis(x, r)
             n += 1
             if n > iteraciju_sk:
-                raise ValueError(f"Per {n} iteraciju nepavyko rasti tinkamo intervalo; Pasirinkite kitus raktus.")
+                raise ValueError(f"Per {n} iteraciju nepavyko pataikyti į intervalą.")
         rez.append(n)
+        # Papildoma iteracija, kad pasikartojančios raidės vis tiek turėtų iteruoti toliau ir nesustotų ties n = 0
+        x = logistinis(x, r)
     return rez
 
 
 def desifruoti(data, r, x0):
-    olo, ohi = orbitos_ribos(r)
     baitai = bytearray()
+    x = x0
     for n in data:
-        xi = x0
         for _ in range(n):
-            xi = logistinis(xi, r)
-        s = int(((xi - olo) / (ohi - olo)) * intervalu_sk) % intervalu_sk
+            x = logistinis(x, r)
+        s = int(x * intervalu_sk) % intervalu_sk
         baitai.append(s)
+        x = logistinis(x, r)
 
     return baitai.decode("utf-8", "replace")
 
 
 def ivestis(r, x0):
     if not (3.57 < r <= 4) or not (0 < x0 < 1):
-        raise ValueError("Raktai turi buti 3.5 < r <= 4 ir 0 < x0 < 1")
+        raise ValueError("Raktai turi buti 3.57 < r <= 4 ir 0 < x0 < 1")
     return r, x0
 
 

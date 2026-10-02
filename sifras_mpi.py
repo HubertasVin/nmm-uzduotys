@@ -16,20 +16,19 @@ def baito_intervalas(s):
 
 
 def sifruoti(data, r, x0):
-    hi = r / 4
-    olo = logistinis(hi, r)
-    w = (hi - olo) / intervalu_sk
     rez = []
+    x = x0
     for s in data:
-        blo = olo + s * w
-        x = x0
         n = 0
-        while not (blo <= x < blo + w):
+        lo, hi = baito_intervalas(s)
+        while not (lo <= x < hi):
             x = logistinis(x, r)
             n += 1
             if n > iteraciju_sk:
                 return None
         rez.append(n)
+        # Papildoma iteracija, kad pasikartojančios raidės vis tiek turėtų iteruoti toliau ir nesustotų ties n = 0
+        x = logistinis(x, r)
     return rez
 
 
@@ -44,7 +43,7 @@ def argumentai():
     parser.add_argument("-f", "--file", help="byla su duomenimis")
     parser.add_argument("tekstas", nargs="?", help="sifruojama fraze (jei nera -f)")
     args = parser.parse_args()
-    if not all(3.5 < r <= 4 for r in args.r) or not (0 < args.x0 < 1):
+    if not all(3.57 < r <= 4 for r in args.r) or not (0 < args.x0 < 1):
         parser.error("r-vertes turi buti 3.57 < r <= 4 ir 0 < x0 < 1")
     if not args.file and args.tekstas is None:
         parser.error("nurodykite fraze arba -f byla")
@@ -76,6 +75,7 @@ def main():
         for r, e in visi:
             e_str = "-" if e is None else f"{e:.4f}"
             print(f"{r:>10.4f} | {e_str:>16}")
+
 
 if __name__ == "__main__":
     main()
