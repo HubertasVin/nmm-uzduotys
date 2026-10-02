@@ -1,4 +1,5 @@
 import argparse
+import time
 
 from mpi4py import MPI
 
@@ -14,80 +15,67 @@ def baito_intervalas(s):
     return s / intervalu_sk, (s + 1) / intervalu_sk
 
 
-def orbitos_ribos(r):
-    hi = r / 4
-    return logistinis(hi, r), hi
-
-
 def sifruoti(data, r, x0):
-    olo, ohi = orbitos_ribos(r)
+    hi = r / 4
+    olo = logistinis(hi, r)
+    w = (hi - olo) / intervalu_sk
     rez = []
     for s in data:
-        n = 0
+        blo = olo + s * w
         x = x0
-        lo, hi = baito_intervalas(s)
-        while not (lo <= (x - olo) / (ohi - olo) < hi):
+        n = 0
+        while not (blo <= x < blo + w):
             x = logistinis(x, r)
             n += 1
             if n > iteraciju_sk:
-                raise ValueError("orbita nepataiko i baito intervala")
+                return None
         rez.append(n)
     return rez
 
 
-def vidurkis(c):
-    return sum(c) / len(c)
+def vidurkis(e):
+    return None if e is None else sum(e) / len(e)
 
 
-def main():
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-
+def argumentai():
     parser = argparse.ArgumentParser(description="Sifro metrikos priklausomybes nuo r skenavimas su MPI")
     parser.add_argument("-r", type=float, nargs="+", required=True, help="tikrinamos r vertes")
     parser.add_argument("-x0", type=float, default=0.2, help="raktas x0")
     parser.add_argument("-f", "--file", help="byla su duomenimis")
     parser.add_argument("tekstas", nargs="?", help="sifruojama fraze (jei nera -f)")
     args = parser.parse_args()
-
     if not all(3.57 < r <= 4 for r in args.r) or not (0 < args.x0 < 1):
         parser.error("r-vertes turi buti 3.57 < r <= 4 ir 0 < x0 < 1")
     if not args.file and args.tekstas is None:
         parser.error("nurodykite fraze arba -f byla")
+    return args
 
+
+def main():
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    args = argumentai()
+
+    data = None
     if rank == 0:
         data = open(args.file, "rb").read() if args.file else args.tekstas.encode()
-        r_values = args.r
-        chunks = [r_values[i::size] for i in range(size)]
-    else:
-        data = None
-        chunks = None
-
+        pradzia = time.time()
     data = comm.bcast(data, root=0)
-    mano_r = comm.scatter(chunks, root=0)
+    mano_r = args.r[rank::size]
 
-    t0 = MPI.Wtime()
-    mano_rez = []
-    for r in mano_r:
-        try:
-            mano_rez.append((r, vidurkis(sifruoti(data, r, args.x0))))
-        except ValueError:
-            mano_rez.append((r, None))
-    laikas = MPI.Wtime() - t0
+    mano_rez = [(r, vidurkis(sifruoti(data, r, args.x0))) for r in mano_r]
 
     rezultatai = comm.gather(mano_rez, root=0)
-    laikai = comm.gather(laikas, root=0)
-
     if rank == 0:
-        visi = sorted(x for chunk in rezultatai for x in chunk)
-        print(f"Procesu: {size} | Laikas: {max(laikai):.2f} s")
+        pabaiga = time.time()
+        visi = sorted(x for rez in rezultatai for x in rez)
+        print(f"Procesu sk.: {size} | Laikas: {pabaiga - pradzia:.2f} s")
         print(f"{'r':>10} | {'vid. iteraciju':>14}")
         print("-" * 27)
         for r, e in visi:
             e_str = "-" if e is None else f"{e:.4f}"
             print(f"{r:>10.4f} | {e_str:>16}")
-
 
 if __name__ == "__main__":
     main()
