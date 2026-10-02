@@ -48,7 +48,7 @@ def desifruoti(data, r, x0):
 
 def ivestis(r, x0):
     if not (3.57 < r <= 4) or not (0 < x0 < 1):
-        raise ValueError("Raktai turi buti 3.57 < r <= 4 ir 0 < x0 < 1")
+        raise ValueError("Raktai turi buti 3.5 < r <= 4 ir 0 < x0 < 1")
     return r, x0
 
 
@@ -72,10 +72,10 @@ def main():
     r, x0 = ivestis(args.r, args.x0)
     c = sifruoti(nuskaityti_duomenis(args.file, args.tekstas), r, x0)
     open("sifras.txt", "w").write(" ".join(map(str, c)))
-    # print("Šifras -> sifras.txt:", " ".join(map(str, c)))
+    print("Šifras -> sifras.txt:", " ".join(map(str, c)))
 
-    # desifruotas = desifruoti(c, r, x0)
-    # print("Desifruotas tekstas: ", desifruotas)
+    desifruotas = desifruoti(c, r, x0)
+    print("Desifruotas tekstas: ", desifruotas)
 
 
 if __name__ == "__main__":
