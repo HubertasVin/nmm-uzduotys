@@ -5,9 +5,7 @@
 #SBATCH -o sifras_%j.out
 
 module load openmpi
-command -v mpicc >/dev/null || { echo "mpicc not found - did 'module load openmpi' succeed?" >&2; exit 1; }
 
-# import mpi4py.MPI dlopens libmpi; bare "import mpi4py" does not
 if ! .venv-hpc/bin/python3 -c "import mpi4py.MPI" 2>/dev/null; then
     rm -rf .venv-hpc
     python3 -m venv .venv-hpc
