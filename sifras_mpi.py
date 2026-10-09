@@ -50,6 +50,16 @@ def argumentai():
     return args
 
 
+def rezultatu_lentele(rezultatai, proc_sk, trukme):
+    visi = sorted(x for rez in rezultatai for x in rez)
+    print(f"Procesu sk.: {proc_sk} | Laikas: {trukme:.2f} s")
+    print(f"{'r':>10} | {'vid. iteraciju':>14}")
+    print("-" * 27)
+    for r, e in visi:
+        e_str = "-" if e is None else f"{e:.4f}"
+        print(f"{r:>10.4f} | {e_str:>16}")
+
+
 def main():
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -68,13 +78,7 @@ def main():
     rezultatai = comm.gather(mano_rez, root=0)
     if rank == 0:
         pabaiga = time.time()
-        visi = sorted(x for rez in rezultatai for x in rez)
-        print(f"Procesu sk.: {size} | Laikas: {pabaiga - pradzia:.2f} s")
-        print(f"{'r':>10} | {'vid. iteraciju':>14}")
-        print("-" * 27)
-        for r, e in visi:
-            e_str = "-" if e is None else f"{e:.4f}"
-            print(f"{r:>10.4f} | {e_str:>16}")
+        rezultatu_lentele(rezultatai, size, pabaiga - pradzia)
 
 
 if __name__ == "__main__":
