@@ -4,8 +4,16 @@
 #SBATCH -t 00:30:00
 #SBATCH -o sifras_%j.out
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+REPO_DIR="${SLURM_SUBMIT_DIR:-$PWD}"
+if [[ -f "$REPO_DIR/pirma/sifras_mpi.py" ]]; then
+    SCRIPT_DIR="$REPO_DIR/pirma"
+elif [[ -f "$REPO_DIR/sifras_mpi.py" ]]; then
+    SCRIPT_DIR="$REPO_DIR"
+    REPO_DIR="$(dirname -- "$SCRIPT_DIR")"
+else
+    echo "Nerastas sifras_mpi.py kataloge $REPO_DIR arba $REPO_DIR/pirma" >&2
+    exit 1
+fi
 VENV_DIR="$REPO_DIR/.venv-hpc"
 cd "$REPO_DIR"
 
