@@ -3,6 +3,9 @@ import argparse
 intervalu_sk = 256
 iteraciju_sk = 100000
 
+OLO = 0.36
+OHI = 0.89
+
 
 def logistinis(x, r):
     return r * x * (1 - x)
@@ -18,7 +21,7 @@ def sifruoti(data, r, x0):
     for s in data:
         n = 0
         lo, hi = baito_intervalas(s)
-        while not (lo <= x < hi):
+        while not (lo <= (x - OLO) / (OHI - OLO) < hi):
             x = logistinis(x, r)
             n += 1
             if n > iteraciju_sk:
@@ -35,7 +38,7 @@ def desifruoti(data, r, x0):
     for n in data:
         for _ in range(n):
             x = logistinis(x, r)
-        s = int(x * intervalu_sk) % intervalu_sk
+        s = int(((x - OLO) / (OHI - OLO)) * intervalu_sk) % intervalu_sk
         baitai.append(s)
         x = logistinis(x, r)
 

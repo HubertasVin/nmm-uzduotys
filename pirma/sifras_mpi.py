@@ -6,6 +6,9 @@ from mpi4py import MPI
 intervalu_sk = 256
 iteraciju_sk = 100000
 
+OLO = 0.36
+OHI = 0.9
+
 
 def logistinis(x, r):
     return r * x * (1 - x)
@@ -21,7 +24,7 @@ def sifruoti(data, r, x0):
     for s in data:
         n = 0
         lo, hi = baito_intervalas(s)
-        while not (lo <= x < hi):
+        while not (lo <= (x - OLO) / (OHI - OLO) < hi):
             x = logistinis(x, r)
             n += 1
             if n > iteraciju_sk:
